@@ -38,11 +38,17 @@
 
 set -eu
 
-USAGE="Usage:\n\t`basename $0` command [args]"
+SELF="$(basename "$0")"
+USAGE="Usage:\t${SELF} command [args]"
+
+### 0. NEVER run as root!
+
+[[ "$(id -u)" -eq 0 ]] \
+  && ( echo "${SELF} should NEVER be run as root! Exiting." >&2; echo "$USAGE"; exit 1 )
 
 ### 1. check/read command-line args
 
-[[ $# -eq 0 ]] && ( echo $USAGE; exit 1 )
+[[ $# -eq 0 ]] && ( echo "$USAGE"; exit 2 )
 
 ### 2. XXX: read config
 
@@ -61,7 +67,7 @@ pre_perf="$(sysctl -n hw.setperf)"	# is 0 when using apm -A or -L, 100 when -H
 #pre_policy="$(sysctl -n hw.perfpolicy)"	# auto, manual, or high
 
 pre_datasize="$(ulimit -d)"		# XXX: may not be needed if running without exec
-pre_shadercachesize="$(echo $MESA_SHADER_CACHE_MAX_SIZE)"
+#pre_shadercachesize="$(printenv MESA_SHADER_CACHE_MAX_SIZE)"
 #pre_dri_prime="$(echo $DRI_PRIME)"	# XXX: maybe for later
 
 ### 3.5 set up handler for exit
