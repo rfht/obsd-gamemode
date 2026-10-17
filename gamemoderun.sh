@@ -34,6 +34,8 @@
 #	* if hybrid GPU system (DRI_PRIME)
 # - may need a daemon to use setpriority(2) or renice(8)
 # - add malloc options optimizations? (see malloc(3))
+# 	* MALLOC_OPTIONS=j
+# 	* MALLOC_OPTIONS=> ???
 ###
 
 set -eu
@@ -67,7 +69,15 @@ pre_shadercachesize="$(echo $MESA_SHADER_CACHE_MAX_SIZE)"
 ### 3.5 set up handler for exit
 
 on_exit() {
-	# XXX: this assumes that only one program is running with game mode
+	# check if multiple instances of this script are running; only execute
+	# this section if we're the last/only instance
+	# XXX: there may be race conditions, but unlikely to encounter in normal
+	#	use
+	ninstances=$(ps -Ao command | fgrep "$SHELL" | fgrep "$(basename $0)" | wc -l | tr -d '[:blank:]')
+	if [[ $ninstances -lt 2 ]]; then
+		return
+	fi
+
 
 	ulimit -d $pre_datasize		# XXX: may not be needed if running without exec
 
@@ -79,6 +89,7 @@ on_exit() {
 		return
 	fi
 
+	# restore previous apm policy
 	if [[ $pre_apm_policy = 1 ]]; then
 		apm -A
 	elif [[ $pre_perf = 100 ]]; then
@@ -90,6 +101,9 @@ on_exit() {
 }
 
 trap 'on_exit' EXIT
+
+# XXX: trap other signals? should ideally restore previous state ($pre_*)
+#	after *any* kind of exit
 
 ### 4. apply optimizations
 

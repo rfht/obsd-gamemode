@@ -27,3 +27,4 @@ May or may not work with [obsdfreqd](https://git.sr.ht/~solene/obsdfreqd).
   - renice(8)/setpriority(2) to prioritize the game process
   - handling multiple games/programs being run in gamemode (would keep a list, and remain active until the last one has exited)
 - Hybrid GPU handling via `DRI_PRIME`, if that works on OpenBSD (untested so far; may need xorg.conf tweaks)
+- Disable X11/Wayland screensaver
