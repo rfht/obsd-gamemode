@@ -50,7 +50,6 @@ USAGE="Usage:\n\t`basename $0` command [args]"
 
 ### 3. snapshot of current settings
 
-
 # check that apm is running
 if [[ -z "$(ps -A | grep /usr/sbin/apmd | grep -v grep)" ]]; then
 	echo "apmd is not running; skipping..."
@@ -66,6 +65,12 @@ pre_datasize="$(ulimit -d)"		# XXX: may not be needed if running without exec
 pre_shadercachesize="$(echo $MESA_SHADER_CACHE_MAX_SIZE)"
 #pre_dri_prime="$(echo $DRI_PRIME)"	# XXX: maybe for later
 
+# get X11 screensaver settings
+pre_x11_ss=$( [[ $(xset q | grep -A2 "^Screen Saver:$" | fgrep "timeout:" | sed -e 's/.*timeout\:[[:blank:]]*\([[:digit:]]*\).*/\1/g') -gt 0 ]] && echo on || echo off)
+pre_x11_dpms=$( $(xset q | fgrep -q "DPMS is Enabled") && echo '+' || echo '-')
+
+# XXX: add wayland support?
+
 ### 3.5 set up handler for exit
 
 on_exit() {
@@ -73,13 +78,13 @@ on_exit() {
 	# this section if we're the last/only instance
 	# XXX: there may be race conditions, but unlikely to encounter in normal
 	#	use
-	ninstances=$(ps -Ao command | fgrep "$SHELL" | fgrep "$(basename $0)" | wc -l | tr -d '[:blank:]')
+	ninstances=$(ps -Ao command | fgrep "$SHELL" | fgrep -c "$(basename $0)")
 	if [[ $ninstances -lt 2 ]]; then
 		return
 	fi
 
-
 	ulimit -d $pre_datasize		# XXX: may not be needed if running without exec
+	xset s $pre_x11_ss ${pre_x11_dpms}dpms
 
 	# XXX: this needs root to adjust
 	#sysctl -q hw.setperf=$pre_perf
@@ -123,7 +128,9 @@ apm -H
 #	for MESA_SHADER_CACHE_MAX_SIZE
 run_env=MESA_SHADER_CACHE_MAX_SIZE=4G
 
-# xset s off -dpms	# fortunately this is taken care of by SDL and Godot
+# some software (e.g. wine) may not disable screensaver by themselves
+# so do it for them
+xset s off -dpms
 
 ### 5. run
 
