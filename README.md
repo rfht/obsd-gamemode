@@ -29,3 +29,4 @@ May or may not work with [obsdfreqd](https://git.sr.ht/~solene/obsdfreqd).
   - handling multiple games/programs being run in gamemode (would keep a list, and remain active until the last one has exited)
 - Hybrid GPU handling via `DRI_PRIME`, if that works on OpenBSD (untested so far; may need xorg.conf tweaks)
 - add wayland support (screensaver/DPMS management)
+- could handle stopping compositor before gaming, and restarting afterwards
