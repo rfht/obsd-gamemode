@@ -96,11 +96,11 @@ on_exit() {
 
 	# restore previous apm policy
 	if [[ $pre_apm_policy = 1 ]]; then
-		apm -A
+		apm -A || echo "failed to set apm -A"
 	elif [[ $pre_perf = 100 ]]; then
-		apm -H
+		apm -H || echo "failed to set apm -H"
 	elif [[ $pre_perf = 0 ]]; then
-		apm -L
+		apm -L || echo "failed to set apm -L"
 	fi
 
 }
@@ -117,7 +117,7 @@ trap 'on_exit' EXIT
 #sysctl -q hw.perfpolicy=manual
 #sysctl -q hw.setperf=100
 
-apm -H
+apm -H || echo "failed to set apm -H"
 
 # set datasize to the min of physical memory (-m) and hard datasize limit (-Hd)
 [[ $(ulimit -Hd) > $(ulimit -m) ]] && \
