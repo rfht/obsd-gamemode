@@ -62,7 +62,7 @@ pre_perf="$(sysctl -n hw.setperf)"	# is 0 when using apm -A or -L, 100 when -H
 #pre_policy="$(sysctl -n hw.perfpolicy)"	# auto, manual, or high
 
 pre_datasize="$(ulimit -d)"		# XXX: may not be needed if running without exec
-pre_shadercachesize="$(echo $MESA_SHADER_CACHE_MAX_SIZE)"
+
 #pre_dri_prime="$(echo $DRI_PRIME)"	# XXX: maybe for later
 
 # get X11 screensaver settings
@@ -126,7 +126,8 @@ apm -H || echo "failed to set apm -H"
 
 # XXX: make this compare if the environment already contains a higher value
 #	for MESA_SHADER_CACHE_MAX_SIZE
-run_env=MESA_SHADER_CACHE_MAX_SIZE=4G
+# NOTE: no need to store previous value as this setting isn't exported
+run_env=MESA_SHADER_CACHE_MAX_SIZE=8G
 
 # some software (e.g. wine) may not disable screensaver by themselves
 # so do it for them
